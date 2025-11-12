@@ -1,0 +1,2 @@
+1;admin;admin123;ADMIN
+2;user;user123;USER

@@ -52,6 +52,38 @@ public class FileStorage implements Storage {
         }
     }
 
+    private void loadHotels() {
+        try (BufferedReader reader = new BufferedReader(new FileReader(HOTELS_FILE))) {
+            String line;
+            Hotel currHotel = null;
+            List<Room> currRooms = new ArrayList<>();
+
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(";");
+                if (parts[0].equals("H")) {
+                    if (currHotel != null) {
+                        hotels.add(new Hotel(currHotel.get_id_hotel(), currHotel.get_hotel_name(), currHotel.get_city_hotel(), currHotel.get_address_hotel(), new ArrayList<>(currRooms)));
+                        currRooms.clear();
+                    }
+                    currHotel = new Hotel(Integer.parseInt(parts[1]), parts[2], parts[3], parts[4], null);
+                }
+                else if (parts[0].equals("R") & currHotel != null) {
+                    currRooms.add(new Room(
+                            Integer.parseInt(parts[1]),
+                            parts[2],
+                            Integer.parseInt(parts[3]),
+                            Double.parseDouble(parts[4])
+                    ));
+                }
+            }
+            if (currHotel != null) {
+                hotels.add(new Hotel(currHotel.get_id_hotel(), currHotel.get_hotel_name(), currHotel.get_city_hotel(), currHotel.get_address_hotel(), currRooms));
+            }
+        } catch (IOException e) {
+            System.err.println("ошибка загрузки отелей " + e.getMessage());
+        }
+    }
+
 
     @Override
     public void saveUsers() {

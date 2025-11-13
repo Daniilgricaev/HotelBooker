@@ -111,11 +111,23 @@ public class FileStorage implements Storage {
 
     @Override
     public void saveUsers() {
-
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(USERS_FILE, false))) {
+            for (User user : users) {
+                writer.write(String.format("%d;%s;%s;%s\n", user.getId(), user.getLogin(), user.getPassword(), user.getRole()));
+            }
+        } catch (IOException e) {
+            System.err.println("ошибка сохранения пользователей " + e.getMessage());
+        }
     }
 
     @Override
     public void saveBookings() {
-
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(BOOKINGS_FILE, false))) {
+            for (Booking booking : bookings) {
+                writer.write(String.format("%d;%d;%d;%d;%s;%s;%s\n", booking.getID(), booking.getUserID(), booking.getHotelID(), booking.getRoomID(), booking.getStartDate(), booking.getEndDate(), booking.getStatus()));
+            }
+        } catch (IOException e) {
+            System.err.println("ошибка сохранения бронирований " + e.getMessage());
+        }
     }
 }

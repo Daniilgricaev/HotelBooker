@@ -4,6 +4,7 @@ import model.*;
 
 import java.io.*;
 import java.nio.*;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
 
@@ -81,6 +82,29 @@ public class FileStorage implements Storage {
             }
         } catch (IOException e) {
             System.err.println("ошибка загрузки отелей " + e.getMessage());
+        }
+    }
+
+    private void loadBookings() {
+        try (BufferedReader reader = new BufferedReader(new FileReader(BOOKINGS_FILE))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(";");
+                if (parts.length == 7) {
+                    Booking booking = new Booking(
+                            Integer.parseInt(parts[0]),
+                            Integer.parseInt(parts[1]),
+                            Integer.parseInt(parts[2]),
+                            Integer.parseInt(parts[3]),
+                            LocalDate.parse(parts[4]),
+                            LocalDate.parse(parts[5]));
+                    booking.serStatus(BookingStatus.valueOf(parts[6]));
+                    bookings.add(booking);
+                }
+            }
+        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
+            System.err.println("ошибка загрузки бронирований " + e.getMessage());
         }
     }
 

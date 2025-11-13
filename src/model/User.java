@@ -30,4 +30,10 @@ public class User {
         return String.format("Your id : %d\nYour login : %s\nYour password : %s\n",id,login,password);
     }
 
+    public void setLogin(String login) {
+        this.login = login;
+    }
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }

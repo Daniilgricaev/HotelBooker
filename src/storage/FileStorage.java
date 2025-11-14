@@ -98,7 +98,7 @@ public class FileStorage implements Storage {
                             Integer.parseInt(parts[3]),
                             LocalDate.parse(parts[4]),
                             LocalDate.parse(parts[5]));
-                    booking.serStatus(BookingStatus.valueOf(parts[6]));
+                    booking.setStatus(BookingStatus.valueOf(parts[6]));
                     bookings.add(booking);
                 }
             }

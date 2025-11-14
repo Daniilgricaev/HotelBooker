@@ -28,16 +28,16 @@ public class BookingService {
     public Booking createBooking(User user, Hotel hotel, Room room, LocalDate start, LocalDate end) {
         // Валидация входных параметров
         if (user == null || hotel == null || room == null) {
-            throw new IllegalArgumentException("User, hotel and room cannot be null");
+            System.out.println("User, hotel and room cannot be null");
         }
 
         if (start == null || end == null || start.isAfter(end) || start.isBefore(LocalDate.now())) {
-            throw new IllegalArgumentException("Invalid dates");
+            System.out.println("Invalid dates");
         }
 
         // Проверка доступности номера
         if (!isRoomAvailable(room.get_room_id(), start, end)) {
-            throw new IllegalStateException("Room is not available for selected dates");
+            System.out.println("Room is not available for selected dates");
         }
 
         // Создание новой брони
@@ -50,9 +50,8 @@ public class BookingService {
                 end
         );
 
-        // Сохранение брони
         storage.getBookings().add(newBooking);
-        storage.saveBookings(); // Сохраняем изменения
+        storage.saveBookings();
 
         return newBooking;
     }

@@ -1,20 +1,20 @@
 package UI;
 
-import models.*;
+import model.*;
 import services.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Scanner;
 
-public class ConsoleApplication {
+public class ConsoleApp {
     private final Scanner scanner = new Scanner(System.in);
     private final UserService userService;
     private final HotelService hotelService;
     private final BookingService bookingService;
     private User currentUser = null;
 
-    public ConsoleApplication(UserService us, HotelService hs, BookingService bs) {
+    public ConsoleApp(UserService us, HotelService hs, BookingService bs) {
         this.userService = us;
         this.hotelService = hs;
         this.bookingService = bs;
@@ -65,7 +65,7 @@ public class ConsoleApplication {
         if (currentUser == null) {
             System.out.println("Ошибка: неверный логин или пароль.");
         } else {
-            System.out.println("Добро пожаловать, " + currentUser.getUsername() + "!");
+            System.out.println("Добро пожаловать, " + currentUser.getLogin() + "!");
         }
     }
 
@@ -88,9 +88,9 @@ public class ConsoleApplication {
         currentUser = null;
     }
 
-    // --- МЕНЮ ПОЛЬЗОВАТЕЛЯ ---
+    // --- МЕНЮ Юзера ---
     private void showUserMenu() {
-        System.out.println("\n--- Главное меню (" + currentUser.getUsername() + ") ---");
+        System.out.println("\n--- Главное меню (" + currentUser.getLogin() + ") ---");
         System.out.println("1. Поиск и бронирование отелей");
         System.out.println("2. Мои бронирования");
         System.out.println("3. Изменить данные аккаунта");
@@ -131,11 +131,11 @@ public class ConsoleApplication {
                 System.out.println("Отель с ID " + hotelId + " не найден.");
                 return;
             }
-            if (!selectedHotel.getCity().equalsIgnoreCase(city)) {
+            if (!selectedHotel.get_city_hotel().equalsIgnoreCase(city)) {
                 System.out.println("Отель с таким ID не найден в результатах поиска.");
                 return;
             }
-            System.out.println("Доступные номера в отеле '" + selectedHotel.getName() + "':");
+            System.out.println("Доступные номера в отеле '" + selectedHotel.get_hotel_name() + "':");
             selectedHotel.getRooms().forEach(System.out::println);
 
             System.out.print("Введите ID номера для бронирования: ");
@@ -151,7 +151,7 @@ public class ConsoleApplication {
             System.out.print("Введите дату выезда (ГГГГ-ММ-ДД): ");
             LocalDate endDate = LocalDate.parse(scanner.nextLine());
 
-            // Проверка корректности дат
+            // проверка корректности дат
             if (endDate.isBefore(startDate) || startDate.isBefore(LocalDate.now())) {
                 System.out.println("Ошибка: некорректные даты бронирования.");
                 return;
@@ -167,16 +167,16 @@ public class ConsoleApplication {
     }
 
     private void handleViewMyBookings() {
-        List<Booking> bookings = bookingService.findBookingsByUser(currentUser);
+        List<Booking> bookings = bookingService.findBookingByUser(currentUser);
         if (bookings.isEmpty()) {
             System.out.println("\nУ вас нет активных или архивных бронирований.");
             return;
         }
         System.out.println("\n--- Мои бронирования ---");
         bookings.forEach(b -> {
-            Hotel h = hotelService.findHotelById(b.getHotelId());
-            String hotelName = (h != null) ? h.getName() : "Отель не найден";
-            System.out.printf("ID: %d, Отель: %s, Даты: %s - %s, Статус: %s\n", b.getId(),
+            Hotel h = hotelService.findHotelById(b.getHotelID());
+            String hotelName = (h != null) ? h.get_hotel_name() : "Отель не найден";
+            System.out.printf("ID: %d, Отель: %s, Даты: %s - %s, Статус: %s\n", b.getHotelID(),
                     hotelName,
                     b.getStartDate(),
                     b.getEndDate(),
@@ -200,11 +200,11 @@ public class ConsoleApplication {
 
     private void handleEditAccount() {
         System.out.println("\n--- Редактирование аккаунта ---");
-        System.out.println("Текущий логин: " + currentUser.getUsername());
+        System.out.println("Текущий логин: " + currentUser.getLogin());
         System.out.print("Введите новый логин (или оставьте пустым, чтобы не менять): ");
         String newUsername = scanner.nextLine();
         if (newUsername.isEmpty()) {
-            newUsername = currentUser.getUsername();
+            newUsername = currentUser.getLogin();
         }
 
         System.out.print("Введите новый пароль (или оставьте пустым, чтобы не менять): ");
@@ -216,16 +216,16 @@ public class ConsoleApplication {
         if (userService.updateUser(currentUser.getId(), newUsername, newPassword)) {
             System.out.println("Данные успешно обновлены.");
             // Обновляем данные текущего пользователя в сессии
-            currentUser.setUsername(newUsername);
+            currentUser.setLogin(newUsername);
             currentUser.setPassword(newPassword);
         } else {
             System.out.println("Не удалось обновить данные.");
         }
     }
 
-    // --- МЕНЮ АДМИНИСТРАТОРА ---
+    // --- МЕНЮ АДМИНA---
     private void showAdminMenu() {
-        System.out.println("\n--- Панель администратора (" + currentUser.getUsername() + ") ---");
+        System.out.println("\n--- Панель администратора (" + currentUser.getLogin() + ") ---");
         System.out.println("1. Просмотреть все бронирования");
         System.out.println("2. Редактировать аккаунт");
         System.out.println("3. Выйти из аккаунта");
@@ -253,10 +253,10 @@ public class ConsoleApplication {
 
         System.out.println("\n--- Все бронирования в системе ---");
         bookings.forEach(b -> {
-            Hotel h = hotelService.findHotelById(b.getHotelId());
-            String hotelName = (h != null) ? h.getName() : "Отель не найден";
+            Hotel h = hotelService.findHotelById(b.getHotelID());
+            String hotelName = (h != null) ? h.get_hotel_name() : "Отель не найден";
             System.out.printf("ID: %d, ID Пользователя: %d, Отель: %s, Даты: %s - %s, Статус: %s\n",
-                    b.getId(), b.getUserId(), hotelName, b.getStartDate(), b.getEndDate(), b.getStatus());
+                    b.getHotelID(), b.getUserID(), hotelName, b.getStartDate(), b.getEndDate(), b.getStatus());
         });
     }
 }

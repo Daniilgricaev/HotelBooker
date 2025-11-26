@@ -2,6 +2,7 @@ package services;
 
 import model.*;
 import storage.FileStorage;
+import storage.Storage;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -10,10 +11,10 @@ import java.util.stream.Collectors;
 
 public class BookingService {
 
-    private FileStorage storage;
+    private Storage storage;
     private AtomicInteger bookingCounter;
 
-    public BookingService(FileStorage storage) {
+    public BookingService(Storage storage) {
         this.storage = storage;
 
         // Инициализируем счетчик на основе существующих бронирований

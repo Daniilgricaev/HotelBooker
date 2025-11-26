@@ -9,7 +9,7 @@ import java.time.LocalTime;
 import java.util.*;
 
 public class FileStorage implements Storage {
-    private static final String USERS_FILE ="data/users.txt";
+    private static final String USERS_FILE ="src/data/users.txt";
     private static final String HOTELS_FILE ="data/hotels.txt";
     private static final String BOOKINGS_FILE ="data/bookings.txt";
 

@@ -14,7 +14,10 @@ public class HotelService {
     }
 
     public List<Hotel> findHotelsByCity(String city) {
-        return storage.getHotels().stream().filter(h -> h.get_city_hotel().equalsIgnoreCase(city)).collect(Collectors.toList());
+        //return storage.getHotels().stream().filter(h -> h.get_city_hotel().equalsIgnoreCase(city)).collect(Collectors.toList());
+        return storage.getHotels().stream()
+                .filter(h -> h.get_city_hotel().toLowerCase().contains(city.toLowerCase()))
+                .collect(Collectors.toList());
     }
 
     public Hotel findHotelById(int id) {

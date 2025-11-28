@@ -131,14 +131,19 @@ public class ConsoleApp {
                 System.out.println("Отель с ID " + hotelId + " не найден.");
                 return;
             }
-            if (!selectedHotel.get_city_hotel().equalsIgnoreCase(city)) {
+//            if (!selectedHotel.get_city_hotel().equalsIgnoreCase(city)) {
+//                System.out.println("Отель с таким ID не найден в результатах поиска.");
+//                return;
+//            }
+            //нестрогая проверка
+            if (!selectedHotel.get_city_hotel().toLowerCase().contains(city.toLowerCase())) {
                 System.out.println("Отель с таким ID не найден в результатах поиска.");
                 return;
             }
             System.out.println("Доступные номера в отеле '" + selectedHotel.get_hotel_name() + "':");
             selectedHotel.getRooms().forEach(System.out::println);
 
-            System.out.print("Введите ID номера для бронирования: ");
+            System.out.print("Введите номер комнаты для бронирования: ");
             int roomId = Integer.parseInt(scanner.nextLine());
             Room selectedRoom = hotelService.findRoomById(selectedHotel, roomId);
 
@@ -157,8 +162,15 @@ public class ConsoleApp {
                 return;
             }
 
-            bookingService.createBooking(currentUser, selectedHotel, selectedRoom, startDate, endDate);
-            System.out.println("Бронирование успешно создано!");
+            //bookingService.createBooking(currentUser, selectedHotel, selectedRoom, startDate, endDate);
+            Booking result = bookingService.createBooking(currentUser, selectedHotel, selectedRoom, startDate, endDate);
+            if (result != null) {
+                System.out.println("Бронирование успешно создано! ID брони: " + result.getID());
+            } else {
+                System.out.println("Ошибка бронирования (см. сообщение выше).");
+            }
+
+            //System.out.println("Бронирование успешно создано!");
         } catch (NumberFormatException e) {
             System.out.println("Ошибка: ID должен быть числом.");
         } catch (DateTimeParseException e) {
@@ -176,8 +188,15 @@ public class ConsoleApp {
         bookings.forEach(b -> {
             Hotel h = hotelService.findHotelById(b.getHotelID());
             String hotelName = (h != null) ? h.get_hotel_name() : "Отель не найден";
-            System.out.printf("ID: %d, Отель: %s, Даты: %s - %s, Статус: %s\n", b.getHotelID(),
+//            System.out.printf("ID: %d, Отель: %s, Даты: %s - %s, Статус: %s\n", b.getHotelID(),
+//                    hotelName,
+//                    b.getStartDate(),
+//                    b.getEndDate(),
+//                    b.getStatus());
+            System.out.printf("Бронь #%d | Отель: %s (ID отеля: %d), Даты: %s - %s, Статус: %s\n",
+                    b.getID(),
                     hotelName,
+                    b.getHotelID(),
                     b.getStartDate(),
                     b.getEndDate(),
                     b.getStatus());

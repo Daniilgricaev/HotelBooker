@@ -35,23 +35,33 @@ public class ConsoleApp {
         }
     }
 
+    private int readInt(String pr) {
+        while (true) {
+            System.out.println(pr);
+            String line = scanner.nextLine().trim();
+            try {
+                return Integer.parseInt(line);
+            } catch (NumberFormatException e) {
+                System.out.println("введите целое число");
+            }
+        }
+    }
+
     private void showAuthMenu() {
         System.out.println("\n--- Меню авторизации ---");
         System.out.println("1. Войти");
         System.out.println("2. Зарегистрироваться");
         System.out.println("3. Выход из программы");
-        System.out.print("Выберите опцию: ");
 
-        try {
-            int choice = Integer.parseInt(scanner.nextLine());
-            switch (choice) {
-                case 1: handleLogin(); break;
-                case 2: handleRegister(); break;
-                case 3: System.out.println("До свидания!"); System.exit(0); break;
-                default: System.out.println("Неверный ввод.");
-            }
-        } catch (NumberFormatException e) {
-            System.out.println("Ошибка: введите число.");
+        int choice = readInt("Выберите опцию: ");
+        switch (choice) {
+            case 1: handleLogin(); break;
+            case 2: handleRegister(); break;
+            case 3:
+                System.out.println("До свидания!");
+                System.exit(0);
+                break;
+            default: System.out.println(">> Неверный выбор, попробуйте снова.");
         }
     }
 
@@ -95,19 +105,14 @@ public class ConsoleApp {
         System.out.println("2. Мои бронирования");
         System.out.println("3. Изменить данные аккаунта");
         System.out.println("4. Выйти из аккаунта");
-        System.out.print("Выберите опцию: ");
 
-        try {
-            int choice = Integer.parseInt(scanner.nextLine());
-            switch (choice) {
-                case 1: handleSearchAndBook(); break;
-                case 2: handleViewMyBookings(); break;
-                case 3: handleEditAccount(); break;
-                case 4: logout(); break;
-                default: System.out.println("Неверный ввод.");
-            }
-        } catch (NumberFormatException e) {
-            System.out.println("Ошибка: введите число.");
+        int choice = readInt("Выберите опцию: ");
+        switch (choice) {
+            case 1: handleSearchAndBook(); break;
+            case 2: handleViewMyBookings(); break;
+            case 3: handleEditAccount(); break;
+            case 4: logout(); break;
+            default: System.out.println("Неверный ввод.");
         }
     }
 

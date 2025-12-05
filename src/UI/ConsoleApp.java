@@ -47,6 +47,31 @@ public class ConsoleApp {
         }
     }
 
+    private LocalDate readDate(String pr) {
+        while (true) {
+            System.out.println(pr);
+            String line = scanner.nextLine().trim();
+            if (line.equals("0")) return null;
+            try {
+                return LocalDate.parse(line);
+            } catch (DateTimeParseException e) {
+                System.out.println("неверный формат даты, используйте ГГГГ-ММ-ДД");
+                System.out.println("введите число 0 для отмены");
+            }
+        }
+    }
+
+    private String readString(String pr) {
+        while (true) {
+            System.out.println(pr);
+            String line = scanner.nextLine().trim();
+            if (!line.isEmpty()) {
+                return line;
+            }
+            System.out.println("поле не может быть пустым");
+        }
+    }
+
     private void showAuthMenu() {
         System.out.println("\n--- Меню авторизации ---");
         System.out.println("1. Войти");
@@ -61,35 +86,45 @@ public class ConsoleApp {
                 System.out.println("До свидания!");
                 System.exit(0);
                 break;
-            default: System.out.println(">> Неверный выбор, попробуйте снова.");
+            default: System.out.println("Неверный выбор.");
         }
     }
 
     private void handleLogin() {
-        System.out.print("Введите логин: ");
-        String username = scanner.nextLine();
-        System.out.print("Введите пароль: ");
-        String password = scanner.nextLine();
+        while (true) {
+            System.out.println("введите 0 в поле логина для возврата");
+            String username = readString("Введите логин: ");
 
-        currentUser = userService.authenticate(username, password);
-        if (currentUser == null) {
-            System.out.println("Ошибка: неверный логин или пароль.");
-        } else {
-            System.out.println("Добро пожаловать, " + currentUser.getLogin() + "!");
+            if (username.equals("0")) return;
+
+            String password = readString("Введите пароль: ");
+
+            currentUser = userService.authenticate(username, password);
+            if (currentUser == null) {
+                System.out.println("Ошибка: неверный логин или пароль.");
+            } else {
+                System.out.println("Добро пожаловать, " + currentUser.getLogin() + "!");
+                return;
+            }
         }
     }
 
     private void handleRegister() {
-        System.out.print("Введите новый логин: ");
-        String username = scanner.nextLine();
-        System.out.print("Введите новый пароль: ");
-        String password = scanner.nextLine();
+        while (true) {
+            System.out.println("введите 0 в поле логина для возврата");
+            String username = readString("Введите новый логин: ");
 
-        User newUser = userService.registerUser(username, password);
-        if (newUser != null) {
-            System.out.println("Регистрация прошла успешно! Теперь вы можете войти.");
-        } else {
-            System.out.println("Ошибка: пользователь с таким логином уже существует.");
+            if (username.equals("0")) return;
+
+            String password = readString("Введите новый пароль: ");
+
+            User newUser = userService.registerUser(username, password);
+            if (newUser != null) {
+                System.out.println("Регистрация прошла успешно! Теперь вы можете войти.");
+                return;
+            } else {
+                System.out.println("Ошибка: пользователь с таким логином уже существует.");
+            }
         }
     }
 

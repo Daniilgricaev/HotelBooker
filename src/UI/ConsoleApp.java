@@ -294,18 +294,13 @@ public class ConsoleApp {
         System.out.println("1. Просмотреть все бронирования");
         System.out.println("2. Редактировать аккаунт");
         System.out.println("3. Выйти из аккаунта");
-        System.out.print("Выберите опцию: ");
 
-        try {
-            int choice = Integer.parseInt(scanner.nextLine());
-            switch (choice) {
-                case 1: handleViewAllBookings(); break;
-                case 2: handleEditAccount(); break;
-                case 3: logout(); break;
-                default: System.out.println("Неверный ввод.");
-            }
-        } catch (NumberFormatException e) {
-            System.out.println("Ошибка: введите число.");
+        int choice = readInt("Выберите опцию: ");
+        switch (choice) {
+            case 1: handleViewAllBookings(); break;
+            case 2: handleEditAccount(); break;
+            case 3: logout(); break;
+            default: System.out.println("Неверный ввод.");
         }
     }
 

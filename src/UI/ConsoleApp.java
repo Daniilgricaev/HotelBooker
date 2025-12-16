@@ -152,70 +152,79 @@ public class ConsoleApp {
     }
 
     private void handleSearchAndBook() {
-        System.out.print("\nВведите город для поиска: ");
-        String city = scanner.nextLine();
-        List<Hotel> hotels = hotelService.findHotelsByCity(city);
+        String city;
+        List<Hotel> hotels;
+        while (true) {
+            System.out.print("\nВведите город для поиска (или 0 для выхода): ");
+            city = scanner.nextLine().trim();
+            if (city.equals("0")) return;
+            if (city.isEmpty()) continue;
 
-        if (hotels.isEmpty()) {
-            System.out.println("Отели в городе '" + city + "' не найдены.");
-            return;
+            hotels = hotelService.findHotelsByCity(city);
+            if (hotels.isEmpty()) {
+                System.out.println("Отели в городе '" + city + "' не найдены.");
+                return;
+            } else {
+                break;
+            }
         }
+
         System.out.println("Найденные отели:");
         hotels.forEach(System.out::println);
-        System.out.print("Введите ID отеля для просмотра номеров: ");
 
-        try {
-            int hotelId = Integer.parseInt(scanner.nextLine());
-            Hotel selectedHotel = hotelService.findHotelById(hotelId);
-            if (selectedHotel == null) {
-                System.out.println("Отель с ID " + hotelId + " не найден.");
-                return;
-            }
-//            if (!selectedHotel.get_city_hotel().equalsIgnoreCase(city)) {
-//                System.out.println("Отель с таким ID не найден в результатах поиска.");
-//                return;
-//            }
-            //нестрогая проверка
-            if (!selectedHotel.get_city_hotel().toLowerCase().contains(city.toLowerCase())) {
+        Hotel selectedHotel = null;
+        while (selectedHotel == null) {
+            int hotelID = readInt("Введите ID отеля для просмотра номеров (0 - назад)");
+            if (hotelID == 0) return;
+
+            selectedHotel = hotelService.findHotelById(hotelID);
+            if (selectedHotel == null || !selectedHotel.get_city_hotel().toLowerCase().contains(city.toLowerCase())) {
                 System.out.println("Отель с таким ID не найден в результатах поиска.");
-                return;
+                selectedHotel = null;
             }
-            System.out.println("Доступные номера в отеле '" + selectedHotel.get_hotel_name() + "':");
-            selectedHotel.getRooms().forEach(System.out::println);
-
-            System.out.print("Введите номер комнаты для бронирования: ");
-            int roomId = Integer.parseInt(scanner.nextLine());
-            Room selectedRoom = hotelService.findRoomById(selectedHotel, roomId);
-
-            if (selectedRoom == null) {
-                System.out.println("Номер с таким ID не найден.");
-                return;
-            }
-            System.out.print("Введите дату заезда (ГГГГ-ММ-ДД): ");
-            LocalDate startDate = LocalDate.parse(scanner.nextLine());
-            System.out.print("Введите дату выезда (ГГГГ-ММ-ДД): ");
-            LocalDate endDate = LocalDate.parse(scanner.nextLine());
-
-            // проверка корректности дат
-            if (endDate.isBefore(startDate) || startDate.isBefore(LocalDate.now())) {
-                System.out.println("Ошибка: некорректные даты бронирования.");
-                return;
-            }
-
-            //bookingService.createBooking(currentUser, selectedHotel, selectedRoom, startDate, endDate);
-            Booking result = bookingService.createBooking(currentUser, selectedHotel, selectedRoom, startDate, endDate);
-            if (result != null) {
-                System.out.println("Бронирование успешно создано! ID брони: " + result.getID());
-            } else {
-                System.out.println("Ошибка бронирования (см. сообщение выше).");
-            }
-
-            //System.out.println("Бронирование успешно создано!");
-        } catch (NumberFormatException e) {
-            System.out.println("Ошибка: ID должен быть числом.");
-        } catch (DateTimeParseException e) {
-            System.out.println("Ошибка: неверный формат даты. Используйте ГГГГ-ММ-ДД.");
         }
+
+        System.out.println("Доступные номера в отеле '" + selectedHotel.get_hotel_name() + "':");
+        selectedHotel.getRooms().forEach(System.out::println);
+
+        Room selectedRoom = null;
+        while (selectedRoom == null) {
+            int roomID = readInt("Введите номер комнаты для бронирования (0 - назад)");
+            if (roomID == 0) return;
+
+            selectedRoom = hotelService.findRoomById(selectedHotel, roomID);
+            if (selectedRoom == null) {
+                System.out.println("Номер с таким ID не найден в этом отеле.");
+            }
+        }
+
+        LocalDate startDate, endDate;
+        while (true) {
+            startDate = readDate("Введите дату заезда (ГГГГ-ММ-ДД): ");
+            if (startDate == null) return;
+
+            endDate = readDate("Введите дату выезда (ГГГГ-ММ-ДД): ");
+            if (endDate == null) return;
+
+            if (startDate.isBefore(LocalDate.now())) {
+                System.out.println("Ошибка: нельзя бронировать в прошлом");
+            } else if (endDate.isBefore(startDate) || endDate.equals(startDate)) {
+                System.out.println("Ошибка: дата выезда должна быть позже даты заезда!");
+            } else {
+                break;
+            }
+        }
+
+        Booking res = bookingService.createBooking(currentUser, selectedHotel, selectedRoom, startDate, endDate);
+        if (res != null) {
+            System.out.println("Бронирование успешно создано! ID брони: " + res.getID());
+        } else {
+            System.out.println("Ошибка бронирования: Номер занят на выбранные даты или произошла другая ошибка.");
+        }
+        // После бронирования (успешного или нет) нажимаем Enter, чтобы вернуться
+        System.out.println("Нажмите Enter, чтобы вернуться в меню...");
+        scanner.nextLine();
+
     }
 
     private void handleViewMyBookings() {
@@ -243,16 +252,13 @@ public class ConsoleApp {
         });
         System.out.print("\nХотите отменить бронирование? (да/нет): ");
         if (scanner.nextLine().equalsIgnoreCase("да")) {
-            System.out.print("Введите ID бронирования для отмены: ");
-            try {
-                int bookingId = Integer.parseInt(scanner.nextLine());
-                if (bookingService.cancelBooking(currentUser, bookingId)) {
-                    System.out.println("Бронирование #" + bookingId + " успешно отменено.");
-                } else {
-                    System.out.println("Не удалось найти бронирование с таким ID, принадлежащее вам.");
-                }
-            } catch (NumberFormatException e) {
-                System.out.println("Ошибка: ID должен быть числом.");
+            int bookingId = readInt("Введите ID бронирования для отмены (0 - назад): ");
+            if (bookingId == 0) return;
+
+            if (bookingService.cancelBooking(currentUser, bookingId)) {
+                System.out.println("Бронирование #" + bookingId + " успешно отменено.");
+            } else {
+                System.out.println("Не удалось найти бронирование с таким ID, принадлежащее вам.");
             }
         }
     }

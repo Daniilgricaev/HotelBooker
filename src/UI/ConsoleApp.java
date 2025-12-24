@@ -13,6 +13,8 @@ public class ConsoleApp {
     private final HotelService hotelService;
     private final BookingService bookingService;
     private User currentUser = null;
+    private static final String LOGIN_REGEX = "^[a-zA-Z0-9_]{3,20}$";
+    private static final String PASSWORD_REGEX = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\\S+$).{8,20}$";
 
     public ConsoleApp(UserService us, HotelService hs, BookingService bs) {
         this.userService = us;
@@ -72,6 +74,52 @@ public class ConsoleApp {
         }
     }
 
+    private String readValidLogin(String pr, boolean isEdit, String currLogin) {
+        while (true) {
+            System.out.println(pr + " (или 0 для отмены)");
+            String input = scanner.nextLine().trim();
+
+            if (input.equals("0")) return null;
+            if (isEdit && input.isEmpty()) return currLogin;
+
+            if (input.isEmpty()) {
+                System.out.println("логин не может быть пустым");
+                continue;
+            }
+
+            if (!input.matches(LOGIN_REGEX)) {
+                System.out.println("Ошибка: Логин должен быть 3-20 симв. (латиница, цифры, '_').");
+                continue;
+            }
+
+            if (!input.equalsIgnoreCase(currLogin) && userService.isLoginExist(input)) {
+                System.out.println("Ошибка: Этот логин уже занят. Выберите другой.");
+                continue;
+            }
+            return input;
+        }
+    }
+
+    private String readValidPassword(String pr, boolean isEdit, String currPassword) {
+        while (true) {
+            System.out.println(pr + " (или 0 для отмены)");
+            String input = scanner.nextLine().trim();
+
+            if (input.equals("0")) return null;
+            if (isEdit && input.isEmpty()) return currPassword;
+
+            if (input.isEmpty()) {
+                System.out.println("Пароль не может быть пустым.");
+                continue;
+            }
+            if (!input.matches(PASSWORD_REGEX)) {
+                System.out.println("Ошибка: пароль слишком слабый. Пароль должен содержать 8-20 символов, без пробелов. Также нужно: цифру, заглавную, строчную буквы и спецсимвол (@#$%^&+=!)");
+                continue;
+            }
+            return input;
+        }
+    }
+
     private void showAuthMenu() {
         System.out.println("\n--- Меню авторизации ---");
         System.out.println("1. Войти");
@@ -110,21 +158,17 @@ public class ConsoleApp {
     }
 
     private void handleRegister() {
-        while (true) {
-            System.out.println("введите 0 в поле логина для возврата");
-            String username = readString("Введите новый логин: ");
+        String login = readValidLogin("введите новый логин: ", false, null);
+        if (login == null) return;
 
-            if (username.equals("0")) return;
+        String password = readValidPassword("введите новый пароль: ", false, null);
+        if (password == null) return;
 
-            String password = readString("Введите новый пароль: ");
-
-            User newUser = userService.registerUser(username, password);
-            if (newUser != null) {
-                System.out.println("Регистрация прошла успешно! Теперь вы можете войти.");
-                return;
-            } else {
-                System.out.println("Ошибка: пользователь с таким логином уже существует.");
-            }
+        User newUser = userService.registerUser(login, password);
+        if (newUser != null) {
+            System.out.println("Регистрация прошла успешно! Теперь вы можете войти.");
+        } else {
+            System.out.println("Произошла непредвиденная ошибка при регистрации, sorry..");
         }
     }
 
@@ -266,22 +310,21 @@ public class ConsoleApp {
     private void handleEditAccount() {
         System.out.println("\n--- Редактирование аккаунта ---");
         System.out.println("Текущий логин: " + currentUser.getLogin());
-        System.out.print("Введите новый логин (или оставьте пустым, чтобы не менять): ");
-        String newUsername = scanner.nextLine();
-        if (newUsername.isEmpty()) {
-            newUsername = currentUser.getLogin();
+
+        String newLogin = readValidLogin("Введите новый логин (или оставьте пустым, чтобы не менять): ", true, currentUser.getLogin());
+        if (newLogin == null) return;
+
+        String newPassword = readValidPassword("Введите новый пароль (или оставьте пустым, чтобы не менять): ", true, currentUser.getPassword());
+        if (newPassword == null) return;
+
+        if (newLogin.equals(currentUser.getLogin()) && newPassword.equals(currentUser.getPassword())) {
+            System.out.println("Изменений нет.");
+            return;
         }
 
-        System.out.print("Введите новый пароль (или оставьте пустым, чтобы не менять): ");
-        String newPassword = scanner.nextLine();
-        if (newPassword.isEmpty()) {
-            newPassword = currentUser.getPassword();
-        }
-
-        if (userService.updateUser(currentUser.getId(), newUsername, newPassword)) {
+        if (userService.updateUser(currentUser.getId(), newLogin, newPassword)) {
             System.out.println("Данные успешно обновлены.");
-            // Обновляем данные текущего пользователя в сессии
-            currentUser.setLogin(newUsername);
+            currentUser.setLogin(newLogin);
             currentUser.setPassword(newPassword);
         } else {
             System.out.println("Не удалось обновить данные.");

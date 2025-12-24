@@ -25,10 +25,17 @@ public class HotelService {
                                 (cap == null || room.room_capacity() >= cap) &&
                                 (type == null || room.get_type().equalsIgnoreCase(type)) &&
                                 bookingService.isRoomAvailable(room.get_room_id(), start, end))).collect(Collectors.toList());
+    }
 
-//        return storage.getHotels().stream()
-//                .filter(h -> h.get_city_hotel().toLowerCase().contains(city.toLowerCase()))
-//                .collect(Collectors.toList());
+    public void sortByPrice(List<Hotel> hotels, boolean a) {
+        Comparator<Hotel> priceComparator = Comparator.comparingDouble(h -> h.getRooms().stream()
+                .mapToDouble(Room::get_price_per_night).min()
+                .orElse(Double.MAX_VALUE));
+        if (a) {
+            hotels.sort(priceComparator);
+        } else {
+            hotels.sort(priceComparator.reversed());
+        }
     }
 
     public Hotel findHotelById(int id) {

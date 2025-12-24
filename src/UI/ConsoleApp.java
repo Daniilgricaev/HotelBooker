@@ -121,6 +121,36 @@ public class ConsoleApp {
         }
     }
 
+    private Double readDoubleOrNull(String pr) {
+        System.out.println(pr + " (или нажмите enter, чтобы пропустить)");
+        String line = scanner.nextLine().trim();
+        if (line.isEmpty()) return null;
+        try {
+            return Double.parseDouble(line);
+        } catch (NumberFormatException e) {
+            System.out.println("Неверный формат числа, параметр пропущен.");
+            return null;
+        }
+    }
+
+    private Integer readIntOrNull(String pr) {
+        System.out.println(pr + " (или нажмите enter, чтобы пропустить)");
+        String line = scanner.nextLine().trim();
+        if (line.isEmpty()) return null;
+        try {
+            return Integer.parseInt(line);
+        } catch (NumberFormatException e) {
+            System.out.println("Неверный формат числа, параметр пропущен.");
+            return null;
+        }
+    }
+
+    private String readStrOrNull(String pr) {
+        System.out.println(pr + " (или нажмите enter, чтобы пропустить)");
+        String line = scanner.nextLine().trim();
+        return line.isEmpty() ? null : line;
+    }
+
     private void showAuthMenu() {
         System.out.println("\n--- Меню авторизации ---");
         System.out.println("1. Войти");

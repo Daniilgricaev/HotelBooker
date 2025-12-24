@@ -4,6 +4,7 @@ import model.*;
 import services.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Scanner;
 
@@ -259,15 +260,41 @@ public class ConsoleApp {
             }
         }
 
-        Booking res = bookingService.createBooking(currentUser, selectedHotel, selectedRoom, startDate, endDate);
-        if (res != null) {
-            System.out.println("Бронирование успешно создано! ID брони: " + res.getID());
+        long nights = ChronoUnit.DAYS.between(startDate, endDate);
+        double total = nights * selectedRoom.get_price_per_night();
+
+        System.out.println("\n=== ПРЕДВАРИТЕЛЬНЫЙ ЧЕК ===");
+        System.out.println("Отель: " + selectedHotel.get_hotel_name());
+        System.out.println("Номер: " + selectedRoom.get_type());
+        System.out.println("Период: " + startDate + " — " + endDate);
+        System.out.println("Количество ночей: " + nights);
+        System.out.println("Цена за ночь: " + selectedRoom.get_price_per_night());
+        System.out.println("---------------------------");
+        System.out.printf("ИТОГО К ОПЛАТЕ: %.2f\n", total);
+
+        System.out.println("Подтвердить бронирование? (да/нет): ");
+        String confirm = scanner.nextLine().trim().toLowerCase();
+
+        if (confirm.equals("да")) {
+            Booking res = bookingService.createBooking(currentUser, selectedHotel, selectedRoom, startDate, endDate);
+            if (res != null) {
+                System.out.println("Бронирование успешно создано! ID брони: " + res.getID());
+            } else {
+                System.out.println("Ошибка бронирования: Номер занят или произошла ошибка.");
+            }
         } else {
-            System.out.println("Ошибка бронирования: Номер занят на выбранные даты или произошла другая ошибка.");
+            System.out.println("Бронирование отменено пользователем.");
         }
-        // После бронирования (успешного или нет) нажимаем Enter, чтобы вернуться
-        System.out.println("Нажмите Enter, чтобы вернуться в меню...");
-        scanner.nextLine();
+
+//        Booking res = bookingService.createBooking(currentUser, selectedHotel, selectedRoom, startDate, endDate);
+//        if (res != null) {
+//            System.out.println("Бронирование успешно создано! ID брони: " + res.getID());
+//        } else {
+//            System.out.println("Ошибка бронирования: Номер занят на выбранные даты или произошла другая ошибка.");
+//        }
+//        // После бронирования (успешного или нет) нажимаем Enter, чтобы вернуться
+//        System.out.println("Нажмите Enter, чтобы вернуться в меню...");
+//        scanner.nextLine();
 
     }
 

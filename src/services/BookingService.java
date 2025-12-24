@@ -3,6 +3,7 @@ package services;
 import model.*;
 import storage.FileStorage;
 import storage.Storage;
+import java.time.temporal.ChronoUnit;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -44,6 +45,11 @@ public class BookingService {
             return null;
         }
 
+        long nights = ChronoUnit.DAYS.between(start, end);
+        if (nights <= 0) nights = 1;
+
+        double totalPrice = nights * room.get_price_per_night();
+
         // Создание новой брони
         Booking newBooking = new Booking(
                 bookingCounter.incrementAndGet(),
@@ -51,7 +57,8 @@ public class BookingService {
                 hotel.get_id_hotel(),
                 room.get_room_id(),
                 start,
-                end
+                end,
+                totalPrice
         );
 
         newBooking.setStatus(BookingStatus.CONFIRMED);

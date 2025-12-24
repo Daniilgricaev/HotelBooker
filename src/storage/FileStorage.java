@@ -92,19 +92,20 @@ public class FileStorage implements Storage {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(";");
-                if (parts.length == 7) {
+                if (parts.length == 8) {
                     Booking booking = new Booking(
                             Integer.parseInt(parts[0]),
                             Integer.parseInt(parts[1]),
                             Integer.parseInt(parts[2]),
                             Integer.parseInt(parts[3]),
                             LocalDate.parse(parts[4]),
-                            LocalDate.parse(parts[5]));
+                            LocalDate.parse(parts[5]),
+                            Double.parseDouble(parts[7])
+                    );
                     booking.setStatus(BookingStatus.valueOf(parts[6]));
                     bookings.add(booking);
                 }
             }
-        } catch (FileNotFoundException e) {
         } catch (IOException e) {
             System.err.println("ошибка загрузки бронирований " + e.getMessage());
         }
@@ -126,7 +127,7 @@ public class FileStorage implements Storage {
     public void saveBookings() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(BOOKINGS_FILE, false))) {
             for (Booking booking : bookings) {
-                writer.write(String.format("%d;%d;%d;%d;%s;%s;%s\n", booking.getID(), booking.getUserID(), booking.getHotelID(), booking.getRoomID(), booking.getStartDate(), booking.getEndDate(), booking.getStatus()));
+                writer.write(String.format("%d;%d;%d;%d;%s;%s;%s;%.2f\n", booking.getID(), booking.getUserID(), booking.getHotelID(), booking.getRoomID(), booking.getStartDate(), booking.getEndDate(), booking.getStatus(), booking.getTotalPrice()));
             }
         } catch (IOException e) {
             System.err.println("ошибка сохранения бронирований " + e.getMessage());

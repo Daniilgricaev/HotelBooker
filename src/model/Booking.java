@@ -10,14 +10,16 @@ public class Booking {
     LocalDate startDate;
     LocalDate endDate;
     BookingStatus status;
+    double totalPrice;
 
-    public Booking(int id,int userID,int hotelID,int roomID,LocalDate startDate,LocalDate endDate){
+    public Booking(int id,int userID,int hotelID,int roomID,LocalDate startDate,LocalDate endDate, double totalPrice){
         this.id = id;
         this.userID = userID;
         this.hotelID = hotelID;
         this.roomID = roomID;
         this.startDate = startDate;
         this.endDate = endDate;
+        this.totalPrice = totalPrice;
     }
     public int getID(){
         return id;
@@ -43,4 +45,5 @@ public class Booking {
     public void setStatus(BookingStatus status){
         this.status = status;
     }
+    public double getTotalPrice() {return totalPrice;}
 }

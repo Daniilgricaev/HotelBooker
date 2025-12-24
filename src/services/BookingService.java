@@ -69,7 +69,7 @@ public class BookingService {
         return newBooking;
     }
 
-    private boolean isRoomAvailable(int roomId, LocalDate start, LocalDate end) {
+    public boolean isRoomAvailable(int roomId, LocalDate start, LocalDate end) {
         return storage.getBookings().stream()
                 .filter(booking -> booking.getRoomID() == roomId &&
                         booking.getStatus() != BookingStatus.CANCELLED)

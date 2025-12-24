@@ -285,17 +285,6 @@ public class ConsoleApp {
         } else {
             System.out.println("Бронирование отменено пользователем.");
         }
-
-//        Booking res = bookingService.createBooking(currentUser, selectedHotel, selectedRoom, startDate, endDate);
-//        if (res != null) {
-//            System.out.println("Бронирование успешно создано! ID брони: " + res.getID());
-//        } else {
-//            System.out.println("Ошибка бронирования: Номер занят на выбранные даты или произошла другая ошибка.");
-//        }
-//        // После бронирования (успешного или нет) нажимаем Enter, чтобы вернуться
-//        System.out.println("Нажмите Enter, чтобы вернуться в меню...");
-//        scanner.nextLine();
-
     }
 
     private void handleViewMyBookings() {

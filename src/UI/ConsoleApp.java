@@ -227,94 +227,132 @@ public class ConsoleApp {
     }
 
     private void handleSearchAndBook() {
-        String city;
-        List<Hotel> hotels;
-        while (true) {
-            System.out.print("\nВведите город для поиска (или 0 для выхода): ");
-            city = scanner.nextLine().trim();
-            if (city.equals("0")) return;
-            if (city.isEmpty()) continue;
-
-            hotels = hotelService.findHotelsByCity(city);
-            if (hotels.isEmpty()) {
-                System.out.println("Отели в городе '" + city + "' не найдены.");
-                return;
-            } else {
-                break;
-            }
-        }
-
-        System.out.println("Найденные отели:");
-        hotels.forEach(System.out::println);
-
-        Hotel selectedHotel = null;
-        while (selectedHotel == null) {
-            int hotelID = readInt("Введите ID отеля для просмотра номеров (0 - назад)");
-            if (hotelID == 0) return;
-
-            selectedHotel = hotelService.findHotelById(hotelID);
-            if (selectedHotel == null || !selectedHotel.get_city_hotel().toLowerCase().contains(city.toLowerCase())) {
-                System.out.println("Отель с таким ID не найден в результатах поиска.");
-                selectedHotel = null;
-            }
-        }
-
-        System.out.println("Доступные номера в отеле '" + selectedHotel.get_hotel_name() + "':");
-        selectedHotel.getRooms().forEach(System.out::println);
-
-        Room selectedRoom = null;
-        while (selectedRoom == null) {
-            int roomID = readInt("Введите номер комнаты для бронирования (0 - назад)");
-            if (roomID == 0) return;
-
-            selectedRoom = hotelService.findRoomById(selectedHotel, roomID);
-            if (selectedRoom == null) {
-                System.out.println("Номер с таким ID не найден в этом отеле.");
-            }
-        }
+        System.out.print("\nВведите город для поиска (или 0 для выхода): ");
+        String city = scanner.nextLine().trim();
+        if (city.equals("0") || city.isEmpty()) return;
 
         LocalDate startDate, endDate;
         while (true) {
             startDate = readDate("Введите дату заезда (ГГГГ-ММ-ДД): ");
             if (startDate == null) return;
-
             endDate = readDate("Введите дату выезда (ГГГГ-ММ-ДД): ");
             if (endDate == null) return;
 
             if (startDate.isBefore(LocalDate.now())) {
                 System.out.println("Ошибка: нельзя бронировать в прошлом");
             } else if (endDate.isBefore(startDate) || endDate.equals(startDate)) {
-                System.out.println("Ошибка: дата выезда должна быть позже даты заезда!");
+                System.out.println("Ошибка: дата выезда должна быть позже заезда");
             } else {
                 break;
             }
         }
 
-        long nights = ChronoUnit.DAYS.between(startDate, endDate);
-        double total = nights * selectedRoom.get_price_per_night();
+        System.out.print("Хотите применить фильтры по цене/типу? (да/нет): ");
+        boolean extraFilter =scanner.nextLine().trim().equalsIgnoreCase("да");
+        Double minP = null, maxP = null;
+        Integer cap = null;
+        String type = null;
 
-        System.out.println("\n=== ПРЕДВАРИТЕЛЬНЫЙ ЧЕК ===");
-        System.out.println("Отель: " + selectedHotel.get_hotel_name());
-        System.out.println("Номер: " + selectedRoom.get_type());
-        System.out.println("Период: " + startDate + " — " + endDate);
-        System.out.println("Количество ночей: " + nights);
-        System.out.println("Цена за ночь: " + selectedRoom.get_price_per_night());
-        System.out.println("---------------------------");
-        System.out.printf("ИТОГО К ОПЛАТЕ: %.2f\n", total);
-
-        System.out.println("Подтвердить бронирование? (да/нет): ");
-        String confirm = scanner.nextLine().trim().toLowerCase();
-
-        if (confirm.equals("да")) {
-            Booking res = bookingService.createBooking(currentUser, selectedHotel, selectedRoom, startDate, endDate);
-            if (res != null) {
-                System.out.println("Бронирование успешно создано! ID брони: " + res.getID());
-            } else {
-                System.out.println("Ошибка бронирования: Номер занят или произошла ошибка.");
-            }
-        } else {
-            System.out.println("Бронирование отменено пользователем.");
+        if (extraFilter) {
+            minP = readDoubleOrNull("Введите мин. цену: ");
+            maxP = readDoubleOrNull("Введите макс. цену: ");
+            cap = readIntOrNull("Вместимость: ");
+            type =readStrOrNull("Тип номера: ");
         }
+
+        List<Hotel> hotels = hotelService.findHotelsByCity(city, minP, maxP, cap, type, startDate, endDate, bookingService);
+
+        if (hotels.isEmpty()) {
+            System.out.println("На эти даты нет свободных номеров (или они не подходят под фильтры).");
+            return;
+        }
+        System.out.println("ортировать по цене? (1 - от дешевых, 2 - от дорогих, enter - без сортировки): ");
+        String sortCh = scanner.nextLine().trim();
+        if (sortCh.equals("1")) {
+            hotelService.sortByPrice(hotels, true);
+        } else if (sortCh.equals("2")) {
+            hotelService.sortByPrice(hotels, false);
+        }
+
+        System.out.println("\nРезультаты поиска (только свободные на ваши даты)");
+        hotels.forEach(System.out::println);
+
+        int hotelID = readInt("Введите ID отеля (0 - назад)");
+        if (hotelID == 0) return;
+        Hotel selectedHotel = hotelService.findHotelById(hotelID);
+
+        System.out.println("Свободные номера в '" + selectedHotel.get_hotel_name() + "':");
+
+        LocalDate fStart = startDate;
+        LocalDate fEnd = endDate;
+        Double fMin = minP;
+        Double fMax = maxP;
+        Integer fCap = cap;
+        String fType = type;
+
+        selectedHotel.getRooms().stream().filter(r -> (fMin == null || r.get_price_per_night() >= fMin))
+                .filter(r -> (fMax == null || r.get_price_per_night() <= fMax))
+                .filter(r -> (fCap == null || r.room_capacity() >= fCap))
+                .filter(r -> (fType == null || r.get_type().equalsIgnoreCase(fType)))
+                .filter(r -> bookingService.isRoomAvailable(r.get_room_id(), fStart, fEnd))
+                .forEach(System.out::println);
+
+        int roomID = readInt("Введите номер комнаты (0 - назад):");
+        if (roomID == 0) return;
+        Room selectedRoom = hotelService.findRoomById(selectedHotel, roomID);
+
+        if (selectedRoom != null) {
+            long nights = ChronoUnit.DAYS.between(startDate, endDate);
+            double total = nights * selectedRoom.get_price_per_night();
+
+            System.out.println("\n=== ПРЕДВАРИТЕЛЬНЫЙ ЧЕК ===");
+            System.out.println("Отель: " + selectedHotel.get_hotel_name());
+            System.out.println("Номер: " + selectedRoom.get_type());
+            System.out.println("Период: " + startDate + " — " + endDate);
+            System.out.println("Количество ночей: " + nights);
+            System.out.println("Цена за ночь: " + selectedRoom.get_price_per_night());
+            System.out.println("---------------------------");
+            System.out.printf("ИТОГО К ОПЛАТЕ: %.2f\n", total);
+
+            System.out.println("Подтвердить бронирование? (да/нет): ");
+            String confirm = scanner.nextLine().trim().toLowerCase();
+
+            if (confirm.equals("да")) {
+                Booking res = bookingService.createBooking(currentUser, selectedHotel, selectedRoom, startDate, endDate);
+                if (res != null) {
+                    System.out.println("Бронирование успешно создано! ID брони: " + res.getID());
+                } else {
+                    System.out.println("Ошибка бронирования");
+                }
+            } else {
+                System.out.println("Бронирование отменено пользователем.");
+            }
+        }
+//        long nights = ChronoUnit.DAYS.between(startDate, endDate);
+//        double total = nights * selectedRoom.get_price_per_night();
+//
+//        System.out.println("\n=== ПРЕДВАРИТЕЛЬНЫЙ ЧЕК ===");
+//        System.out.println("Отель: " + selectedHotel.get_hotel_name());
+//        System.out.println("Номер: " + selectedRoom.get_type());
+//        System.out.println("Период: " + startDate + " — " + endDate);
+//        System.out.println("Количество ночей: " + nights);
+//        System.out.println("Цена за ночь: " + selectedRoom.get_price_per_night());
+//        System.out.println("---------------------------");
+//        System.out.printf("ИТОГО К ОПЛАТЕ: %.2f\n", total);
+//
+//        System.out.println("Подтвердить бронирование? (да/нет): ");
+//        String confirm = scanner.nextLine().trim().toLowerCase();
+//
+//        if (confirm.equals("да")) {
+//            Booking res = bookingService.createBooking(currentUser, selectedHotel, selectedRoom, startDate, endDate);
+//            if (res != null) {
+//                System.out.println("Бронирование успешно создано! ID брони: " + res.getID());
+//            } else {
+//                System.out.println("Ошибка бронирования");
+//            }
+//        } else {
+//            System.out.println("Бронирование отменено пользователем.");
+//        }
     }
 
     private void handleViewMyBookings() {

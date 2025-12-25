@@ -19,7 +19,7 @@ public class HotelService {
                                         Integer cap, String type, LocalDate start,
                                         LocalDate end, BookingService bookingService) {
         return storage.getHotels().stream()
-                .filter(h -> h.get_city_hotel().equalsIgnoreCase(city)).filter(h -> h.getRooms().stream().anyMatch(room ->
+                .filter(h -> h.get_city_hotel().toLowerCase().contains(city.toLowerCase())).filter(h -> h.getRooms().stream().anyMatch(room ->
                         (minP == null || room.get_price_per_night() >= minP) &&
                                 (maxP == null || room.get_price_per_night() <= maxP) &&
                                 (cap == null || room.room_capacity() >= cap) &&

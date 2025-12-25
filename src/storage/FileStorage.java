@@ -100,7 +100,7 @@ public class FileStorage implements Storage {
                             Integer.parseInt(parts[3]),
                             LocalDate.parse(parts[4]),
                             LocalDate.parse(parts[5]),
-                            Double.parseDouble(parts[7])
+                            Double.parseDouble(parts[7].replace(',', '.'))
                     );
                     booking.setStatus(BookingStatus.valueOf(parts[6]));
                     bookings.add(booking);

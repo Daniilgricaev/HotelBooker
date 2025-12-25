@@ -1,17 +1,14 @@
-import services.*;
-import storage.Storage;
-import storage.FileStorage;
 import UI.ConsoleApp;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ConfigurableApplicationContext;
 
+@SpringBootApplication(scanBasePackages = {"services","storage","UI", "com.hotelbooker"})
 public class Main {
     public static void main(String[] args) {
-        Storage storage = new FileStorage();
-        UserService userService = new UserService(storage);
-        HotelService hotelService = new HotelService(storage);
-        BookingService bookingService = new BookingService(storage);
+        ConfigurableApplicationContext context = SpringApplication.run(Main.class, args);
 
-        ConsoleApp app = new ConsoleApp(userService, hotelService, bookingService);
-        app.run();
-
+        ConsoleApp consoleApp = context.getBean(ConsoleApp.class);
+        consoleApp.run();
     }
 }

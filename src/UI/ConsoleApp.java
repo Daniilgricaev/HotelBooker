@@ -7,6 +7,11 @@ import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Scanner;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+
+@Component
 public class ConsoleApp {
     private final Scanner scanner = new Scanner(System.in);
     private final UserService userService;
@@ -16,6 +21,8 @@ public class ConsoleApp {
     private static final String LOGIN_REGEX = "^[a-zA-Z0-9_]{3,20}$";
     private static final String PASSWORD_REGEX = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\\S+$).{8,20}$";
 
+
+    @Autowired
     public ConsoleApp(UserService us, HotelService hs, BookingService bs) {
         this.userService = us;
         this.hotelService = hs;

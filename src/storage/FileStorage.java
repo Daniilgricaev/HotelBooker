@@ -8,19 +8,37 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import javax.annotation.PostConstruct;
+
+
+@Component
 public class FileStorage implements Storage {
-    private static final String USERS_FILE ="src/data/users.txt";
-    private static final String HOTELS_FILE ="src/data/hotels.txt";
-    private static final String BOOKINGS_FILE ="src/data/bookings.txt";
+
+    @Value("${data.users.file:src/data/users.txt}")
+    private String USERS_FILE;
+
+    @Value("${data.hotels.file:src/data/hotels.txt}")
+    private String HOTELS_FILE;
+
+    @Value("${data.bookings.file:src/data/bookings.txt}")
+    private String BOOKINGS_FILE;
+
 
     private final List<User> users = new ArrayList<>();
     private final List<Hotel> hotels = new ArrayList<>();
     private final List<Booking> bookings = new ArrayList<>();
 
     public FileStorage() {
+    }
+
+    @PostConstruct
+    public void init(){
         loadUsers();
         loadHotels();
         loadBookings();
+        System.out.println("Spring: Данные загружены из файлов");
     }
 
     @Override

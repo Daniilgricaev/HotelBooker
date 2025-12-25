@@ -3,13 +3,16 @@ package services;
 import model.Role;
 import model.User;
 import storage.Storage;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import java.util.concurrent.atomic.*;
 
+
+@Service
 public class UserService {
     private final Storage storage;
     private final AtomicInteger userIDCnt;
-
+    @Autowired
     public UserService(Storage storage) {
         this.storage = storage;
         this.userIDCnt = new AtomicInteger(storage.getUsers().stream().mapToInt(User::getId).max().orElse(0));

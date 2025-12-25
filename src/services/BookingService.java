@@ -30,15 +30,18 @@ public class BookingService {
         // Валидация входных параметров
         if (user == null || hotel == null || room == null) {
             System.out.println("User, hotel and room cannot be null");
+            return null;
         }
 
         if (start == null || end == null || start.isAfter(end) || start.isBefore(LocalDate.now())) {
             System.out.println("Invalid dates");
+            return null;
         }
 
         // Проверка доступности номера
         if (!isRoomAvailable(room.get_room_id(), start, end)) {
             System.out.println("Room is not available for selected dates");
+            return null;
         }
 
         // Создание новой брони
@@ -50,6 +53,8 @@ public class BookingService {
                 start,
                 end
         );
+
+        newBooking.setStatus(BookingStatus.CONFIRMED);
 
         storage.getBookings().add(newBooking);
         storage.saveBookings();

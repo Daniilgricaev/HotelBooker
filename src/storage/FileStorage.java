@@ -10,8 +10,8 @@ import java.util.*;
 
 public class FileStorage implements Storage {
     private static final String USERS_FILE ="src/data/users.txt";
-    private static final String HOTELS_FILE ="data/hotels.txt";
-    private static final String BOOKINGS_FILE ="data/bookings.txt";
+    private static final String HOTELS_FILE ="src/data/hotels.txt";
+    private static final String BOOKINGS_FILE ="src/data/bookings.txt";
 
     private final List<User> users = new ArrayList<>();
     private final List<Hotel> hotels = new ArrayList<>();
@@ -19,6 +19,8 @@ public class FileStorage implements Storage {
 
     public FileStorage() {
         loadUsers();
+        loadHotels();
+        loadBookings();
     }
 
     @Override

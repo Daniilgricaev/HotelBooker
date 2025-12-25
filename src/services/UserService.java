@@ -45,4 +45,8 @@ public class UserService {
         return false;
     }
 
+    public boolean isLoginExist( String username) {
+        return storage.getUsers().stream().anyMatch(u->u.getLogin().equalsIgnoreCase(username));
+    }
+
 }

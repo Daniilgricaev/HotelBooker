@@ -36,4 +36,9 @@ public class Hotel {
     public String get_about_hotel(){
         return String.format("Hotel id : %d\nHotel name : %s\nAddress : %s\nCity : %s\n",Hotel_id,Hotel,city,address);
     }
+
+    @Override
+    public String toString() {
+        return String.format("Hotel id : %d\nHotel name : %s\nCity : %s\nAddress : %s\n",Hotel_id,Hotel,city,address);
+    }
 }
